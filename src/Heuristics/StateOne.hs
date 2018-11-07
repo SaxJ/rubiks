@@ -63,11 +63,11 @@ heuristicIndices = map $ V.foldl foldString "" . orien
 
 {-
  - Set the list of keys to the value in the provided hashmap.
- - This uses `seq` to ensure that duplicate keys already in the map are not overridden
+ - This uses `const` to ensure that duplicate keys already in the map are not overridden
  -}
 setHashKeys :: [String] -> Int -> M.HashMap String Int -> M.HashMap String Int
 setHashKeys [] _ hash = hash
-setHashKeys (x:xs) dist hash = setHashKeys xs dist $ M.insertWith seq x dist hash
+setHashKeys (x:xs) dist hash = setHashKeys xs dist $ M.insertWith const x dist hash
 
 {-
  - Get a list of the keys for given value.
@@ -100,7 +100,7 @@ distribution hash = some [] 0
  - This is calculated by visiting each possible state and indexing the number of moves required to reach it.
  - It is calculated when it is first evaluated but it is quite inexpensive and will be in memory afterwards anyway.
  -}
-heuristicList = generateLookup $ M.singleton (replicate numEdges '0') 0
+heuristicList = generateLookup $ M.singleton (replicate numEdges '1') 0
     where
         generateLookup hash = if M.size hash >= 2048 then hash else generateLookup hash'
             where
