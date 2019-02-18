@@ -1,4 +1,5 @@
 dist
+.vim
 dist-*
 cabal-dev
 *.o
