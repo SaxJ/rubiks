@@ -1,6 +1,7 @@
 module FaceModel.Cube where
 
 import Prelude hiding (Right, Left)
+import Data.List
 
 data Face = Front | Right | Back | Left | Up | Down deriving (Eq, Ord, Enum, Show)
 data Colour = Green | Red | Orange | Blue | Yellow | White deriving (Eq, Enum, Ord)
@@ -24,6 +25,12 @@ type Cube = [Cublet]
 type Transform = [Face]
 
 data Rotation = Clockwise | Anticlockwise deriving (Eq, Enum, Ord, Show)
+
+-- PRINT HELPERS ------------------------------
+-- This is gonna be tricky
+viewFace :: Face -> Cube -> [Colour]
+viewFace face cube = [White]
+-- --------------------------------------------
 
 faceletFace :: Facelet -> Face
 faceletFace = fst
@@ -49,8 +56,8 @@ isEdge c = length c == 2
 cubletFaces :: Cublet -> [Face]
 cubletFaces = map fst
 
-cubletHasFace :: Cublet -> Face -> Bool
-cubletHasFace cublet face = elem face $ cubletFaces cublet
+cubletHasFace :: Face -> Cublet -> Bool
+cubletHasFace face cublet = elem face $ cubletFaces cublet
 
 {-|
 Turning this face clockwise will move the facelets of this face around this pattern.
@@ -68,3 +75,19 @@ getClockwiseTransform face = case face of
         frontBackAxis = [Up, Right, Down, Left]
         rightLeftAxis = [Front, Up, Back, Down]
         upDownAxis = [Front, Right, Back, Left]
+
+nextInTransform :: Face -> Transform -> Face
+nextInTransform f fs = let currentIndex = elemIndex f fs
+    in case currentIndex of
+        Just idx -> fs !! (idx + 1)
+        Nothing -> f
+
+transformCublet :: Transform -> Cublet -> Cublet
+transformCublet t cublet = map (\(f,c) -> (nextInTransform f t, c)) cublet
+
+rotateFace :: Rotation -> Face -> Cube -> Cube
+rotateFace rot face cube = moved ++ notOnFace
+    where
+        (onFace, notOnFace) = partition (cubletHasFace face) cube
+        transform = if rot == Clockwise then getClockwiseTransform face else reverse $ getClockwiseTransform face
+        moved = map (transformCublet transform) onFace
