@@ -83,7 +83,7 @@ nextInTransform f fs = let currentIndex = elemIndex f fs
         Nothing -> f
 
 transformCublet :: Transform -> Cublet -> Cublet
-transformCublet t cublet = map (\(f,c) -> (nextInTransform f t, c)) cublet
+transformCublet t = map (\(f,c) -> (nextInTransform f t, c))
 
 rotateFace :: Rotation -> Face -> Cube -> Cube
 rotateFace rot face cube = moved ++ notOnFace
@@ -91,3 +91,5 @@ rotateFace rot face cube = moved ++ notOnFace
         (onFace, notOnFace) = partition (cubletHasFace face) cube
         transform = if rot == Clockwise then getClockwiseTransform face else reverse $ getClockwiseTransform face
         moved = map (transformCublet transform) onFace
+
+
