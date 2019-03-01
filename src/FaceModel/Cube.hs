@@ -27,11 +27,11 @@ type Transform = [Face]
 data Rotation = Clockwise | Anticlockwise deriving (Eq, Enum, Ord, Show)
 
 -- PRINT HELPERS ------------------------------
--- This is gonna be tricky
 viewFace :: Face -> Cube -> [Colour]
-viewFace face cube = [White]
+viewFace face cube = map snd $ filter (\(f,_) -> f == face) $ concat cube
 -- --------------------------------------------
 
+-- ACCESSORS
 faceletFace :: Facelet -> Face
 faceletFace = fst
 
@@ -58,6 +58,27 @@ cubletFaces = map fst
 
 cubletHasFace :: Face -> Cublet -> Bool
 cubletHasFace face cublet = elem face $ cubletFaces cublet
+
+-- CONVERSION
+rotate :: Int -> [a] -> [a]
+rotate _ [] = []
+rotate n ls = take (length ls) $ drop n $ cycle ls
+
+rotateCublet :: Cublet -> Cublet
+rotateCublet c = zip fs cs where
+    fs = rotate 1 $ map fst c
+    cs = map snd c
+
+cubletToOrientation :: Cublet -> Int
+cubletToOrientation c
+    | isCorner c = cornerOrientation c
+    | isEdge c = edgeOrientation c
+    | otherwise = 0
+    where
+        cornerOrientation c
+            | isCubeletCorrect c = 0
+            | otherwise = if isCubeletCorrect $ rotateCublet c then 1 else -1
+        edgeOrientation c = if isCubeletCorrect c then 0 else 1
 
 {-|
 Turning this face clockwise will move the facelets of this face around this pattern.
