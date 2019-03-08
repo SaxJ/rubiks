@@ -38,8 +38,11 @@ faceletFace = fst
 faceletColour :: Facelet -> Colour
 faceletColour = snd
 
+correctFace :: Colour -> Face
+correctFace = toEnum . fromEnum
+
 correctFacelet :: Facelet -> Face
-correctFacelet = toEnum . fromEnum . faceletColour
+correctFacelet = correctFace . faceletColour
 
 isFaceletCorrect :: Facelet -> Bool
 isFaceletCorrect f = faceletFace f == correctFacelet f
@@ -55,6 +58,9 @@ isEdge c = length c == 2
 
 cubletFaces :: Cublet -> [Face]
 cubletFaces = map fst
+
+cubletColours :: Cublet -> [Colour]
+cubletColours = map snd
 
 cubletHasFace :: Face -> Cublet -> Bool
 cubletHasFace face cublet = elem face $ cubletFaces cublet
@@ -79,6 +85,42 @@ cubletToOrientation c
             | isCubeletCorrect c = 0
             | otherwise = if isCubeletCorrect $ rotateCublet c then 1 else -1
         edgeOrientation c = if isCubeletCorrect c then 0 else 1
+
+cornerToPosition :: [Face] -> Int
+cornerToPosition fs = case sort fs of
+    [Back, Left, Up] -> 1
+    [Front, Left, Down] -> 2
+    [Right, Back, Down] -> 3
+    [Front, Right, Up] -> 4
+    [Front, Left, Up] -> 5
+    [Back, Left, Down] -> 6
+    [Front, Right, Down] -> 7
+    [Right, Back, Up] -> 8
+    _ -> error "This is not a valid corner piece"
+
+cubletCorrectPosition :: Cublet -> Int
+cubletCorrectPosition c
+    | isCorner c = cornerToPosition $ correctFaces
+    | isEdge c = edgeToPosition $ correctFaces
+    | otherwise = error "Fucksie whucksie"
+    where
+        correctFaces = map (correctFace . faceletColour) c
+
+edgeToPosition :: [Face] -> Int
+edgeToPosition fs = case sort fs of
+    [Left, Up] -> 1
+    [Left, Down] -> 2
+    [Right, Up] -> 3
+    [Right, Down] -> 4
+    [Left, Back] -> 5
+    [Front, Left] -> 6
+    [Front, Right] -> 7
+    [Right, Back] -> 8
+    [Front, Up] -> 9
+    [Front, Down] -> 10
+    [Back, Down] -> 11
+    [Back, Up] -> 12
+    _ -> error "This is not a valid edge piece"
 
 {-|
 Turning this face clockwise will move the facelets of this face around this pattern.
