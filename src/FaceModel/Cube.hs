@@ -133,12 +133,22 @@ edgeToPosition fs = case sort fs of
 permutationPairs :: Cube -> [(Int, Int)]
 permutationPairs = map (\cb -> (cubletCorrectPosition cb, cubletPosition cb))
 
+orientationPairs :: Cube -> [(Int, Int)]
+orientationPairs = map (\cb -> (cubletToOrientation cb, cubletPosition cb))
+
 cubeToPermutations :: Cube -> [[Int]]
 cubeToPermutations c = [edgePerm, cornerPerm]
     where
-        toPermList cube = map fst $ sortOn snd $ permutationPairs cube
-        edgePerm = toPermList $ filter isEdge c
-        cornerPerm = toPermList $ filter isCorner c
+        toPermList ls = map fst $ sortOn snd ls
+        edgePerm = toPermList $ permutationPairs $ filter isEdge c
+        cornerPerm = toPermList $ permutationPairs $ filter isCorner c
+
+cubeToOrientations :: Cube -> [[Int]]
+cubeToOrientations c = [edgeOrien, cornerOrien]
+    where
+        toList ls = map fst $ sortOn snd ls
+        edgeOrien = toList $ orientationPairs $ filter isEdge c
+        cornerOrien = toList $ orientationPairs $ filter isCorner c
 
 {-|
 Turning this face clockwise will move the facelets of this face around this pattern.
