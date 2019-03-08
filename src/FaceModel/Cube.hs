@@ -106,6 +106,14 @@ cubletCorrectPosition c
     where
         correctFaces = map (correctFace . faceletColour) c
 
+cubletPosition :: Cublet -> Int
+cubletPosition c
+    | isCorner c = cornerToPosition $ faces
+    | isEdge c = edgeToPosition $ faces
+    | otherwise = error "Fucksie whucksie"
+    where
+        faces = cubletFaces c
+
 edgeToPosition :: [Face] -> Int
 edgeToPosition fs = case sort fs of
     [Left, Up] -> 1
@@ -121,6 +129,16 @@ edgeToPosition fs = case sort fs of
     [Back, Down] -> 11
     [Back, Up] -> 12
     _ -> error "This is not a valid edge piece"
+
+permutationPairs :: Cube -> [(Int, Int)]
+permutationPairs = map (\cb -> (cubletCorrectPosition cb, cubletPosition cb))
+
+cubeToPermutations :: Cube -> [[Int]]
+cubeToPermutations c = [edgePerm, cornerPerm]
+    where
+        toPermList cube = map fst $ sortOn snd $ permutationPairs cube
+        edgePerm = toPermList $ filter isEdge c
+        cornerPerm = toPermList $ filter isCorner c
 
 {-|
 Turning this face clockwise will move the facelets of this face around this pattern.
