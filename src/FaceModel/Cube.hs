@@ -24,6 +24,8 @@ type Cube = [Cublet]
 
 type Transform = [Face]
 
+type Position = String
+
 data Rotation = Clockwise | Anticlockwise deriving (Eq, Enum, Ord, Show)
 
 -- PRINT HELPERS ------------------------------
@@ -100,19 +102,22 @@ cornerToPosition fs = case sort fs of
 
 cubletCorrectPosition :: Cublet -> Int
 cubletCorrectPosition c
-    | isCorner c = cornerToPosition $ correctFaces
-    | isEdge c = edgeToPosition $ correctFaces
+    | isCorner c = cornerToPosition correctFaces
+    | isEdge c = edgeToPosition correctFaces
     | otherwise = error "Fucksie whucksie"
     where
         correctFaces = map (correctFace . faceletColour) c
 
-cubletPosition :: Cublet -> Int
+cubletPosition :: Cublet -> Position
 cubletPosition c
-    | isCorner c = cornerToPosition $ faces
-    | isEdge c = edgeToPosition $ faces
+    | isCorner c = ('c' : show $ cornerToPosition faces)
+    | isEdge c = edgeToPosition faces
     | otherwise = error "Fucksie whucksie"
     where
         faces = cubletFaces c
+
+positionToIndex :: Position -> Int
+positionToIndex (x:xs) = read xs
 
 edgeToPosition :: [Face] -> Int
 edgeToPosition fs = case sort fs of
